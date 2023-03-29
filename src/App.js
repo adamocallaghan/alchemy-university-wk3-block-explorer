@@ -6,20 +6,11 @@ import {utils} from 'ethers';
 
 import 'react-data-grid/lib/styles.css';
 
-// Refer to the README doc for more information about using API
-// keys in client-side code. You should never do this in production
-// level code.
 const settings = {
   apiKey: process.env.REACT_APP_ALCHEMY_API_KEY,
   network: Network.ETH_MAINNET,
 };
 
-
-// In this week's lessons we used ethers.js. Here we are using the
-// Alchemy SDK is an umbrella library with several different packages.
-//
-// You can read more about the packages here:
-//   https://docs.alchemy.com/reference/alchemy-sdk-api-surface-overview#api-surface
 const alchemy = new Alchemy(settings);
 
 function App() {
@@ -27,6 +18,7 @@ function App() {
   const [blockTransactions, setBlockTransactions] = useState([]);
   const [transactionSelected, setTransactionSelected] = useState("");
 
+  // To kick things off, get the block number
   useEffect(() => {
     async function getBlockNumber() {
       setBlockNumber(await alchemy.core.getBlockNumber());
@@ -35,6 +27,7 @@ function App() {
     getBlockNumber();
   },[]);
 
+  // Then use the block number to grab some useful info (i.e. transactions)
   useEffect(() => {
     async function setTransactions() {
       try {
@@ -49,12 +42,14 @@ function App() {
     setTransactions();
   },[blockNumber]);
 
+  // When a transaction is click/selected setTransactionSelected with it
   const handleSelectTransaction = (hash) => {
     if(blockTransactions.length === 0) setTransactionSelected('')
 
     setTransactionSelected(hash)
   }
 
+  // Calculate the gas fee use the gasLimit and gasPrice
   const calcFee = (transaction, toFixed) => {
     const gasFee = transaction.gasLimit * transaction.gasPrice
 
@@ -63,11 +58,13 @@ function App() {
     return parseFloat(utils.formatEther(gasFee.toString())).toFixed(toFixed)
   }
 
+  // Go to the earlier block
   const previousBlock = () => {
     const actualBlocknumber = blockNumber - 1 < 0 ? 0 : blockNumber - 1 
     setBlockNumber(actualBlocknumber)
   }
 
+  // Go to the later block
   const nextBlock = () => {
     const actualBlocknumber = blockNumber + 1 
     setBlockNumber(actualBlocknumber)
@@ -89,6 +86,7 @@ function App() {
     return {};
   }
 
+  // Header and Navigation
   const Block = () => {
     return (
       <>
@@ -97,8 +95,8 @@ function App() {
                     <h1 href="#">Block Explorer</h1>
                     <div class="btn-group">
                         <button type="button" className="btn btn-link">{` Block Number: ${blockNumber} `}</button>
-                        <button type="button" className="btn btn-primary" onClick={() => previousBlock()}>Previous Block</button>
-                        <button type="button" className="btn btn-primary" onClick={() => nextBlock()}>Next Block</button>
+                        <button type="button" className="btn btn-primary" onClick={() => previousBlock()}>Earlier Block</button>
+                        <button type="button" className="btn btn-primary" onClick={() => nextBlock()}>Later Block</button>
                     </div>
                 </div>
             </nav>
@@ -106,25 +104,20 @@ function App() {
     );
   }
 
+  // Transactions Table
   const Transactions = () => {
     return (
       <>
-        <div className="container" style={{
-          overflow: "auto",
-          maxHeight: "20rem",
-          cursor: "pointer"
+        <div className="col" style={{
+            width: "60%",
         }}>
-          <table className='table table-striped table-condensed'>
-            <thead>
+          <table className='table table-condensed'>
+            <thead className='thead-dark'>
               <tr>
                 <th>Transaction Hash</th>
-                {/* <th>Block</th> */}
                 <th>From</th>
                 <th>To</th>
-                {/* <th>Confirmations</th> */}
                 <th>Value</th>
-                <th>Transaction Fee</th>
-                {/* <th>Data</th> */}
               </tr>
             </thead>
             <tbody>
@@ -132,13 +125,9 @@ function App() {
                 return (
                   <tr key={transaction.hash} onClick={() => handleSelectTransaction(transaction.hash)}>
                     <th >{getSubstring(transaction.hash, 15)}</th>
-                    {/* <th>{transaction.blockNumber}</th> */}
                     <th>{getSubstring(transaction.from, 15)}</th>
                     <th>{getSubstring(transaction.to, 15)}</th>
-                    {/* <th>{transaction.confirmations}</th> */}
                     <th>{parseFloat(utils.formatEther(transaction.value.toString())).toFixed(12)}</th>
-                    <th>{calcFee(transaction, 5)}</th>
-                    {/* <th>{getSubstring(transaction.data,15)}</th> */}
                   </tr>
                 )
               })}
@@ -149,26 +138,24 @@ function App() {
     );
   }
 
+  // Detail instances rendered into larger TransactionDetail component below
   const Detail = (props) => {
     return (
-      <div style={{
-        display:"flex", 
-        flexDirection: "row",
-        justifyContent:"flex-start", 
-        marginLeft: 24, 
-        fontSize: 14,
-      }}>
+      <div>
         <p style={{marginLeft: 10, marginRight: 10, fontWeight: "bold"}}>{props.name}:</p>
         <p>{props.value}</p>
       </div>
     )
   }
 
+  // The actual TransactionDetail media card rendered with additional transaction details
   const TransactionDetail = (props) => {
     return (
     <>
-        <div className="container media border p-3">
-            <b>{"Transaction Hash"}</b>
+        <div className="media border p-3 col" style={{
+            width: "40%",
+        }}>
+            <h3>{"Selected Transaction"}</h3>
             <hr></hr>
         <div className="media-body">
             <Detail name={"Transaction Hash"} value={props.transaction.hash}/>
@@ -176,7 +163,6 @@ function App() {
             <Detail name={"From"} value={props.transaction.from}/>
             <Detail name={"To"} value={props.transaction.to}/>
             <Detail name={"Confirmations"} value={props.transaction.confirmations}/>
-            {/* <Detail name={"value"} value={props.transaction.value}/> */}
             <Detail name={"Transaction Fee"} value={calcFee(props.transaction, 18)}/>
             <Detail name={"Data"} value={props.transaction.data} />
         </div>
@@ -188,8 +174,12 @@ function App() {
   return (
     <>
       <Block />
+      <div className='row'  style={{
+        fontSize: 14,
+      }}>
       <Transactions />
       <TransactionDetail transaction={getTransaction(transactionSelected)}/>
+      </div>
     </>
   );
 }
