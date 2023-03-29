@@ -92,19 +92,16 @@ function App() {
   const Block = () => {
     return (
       <>
-        <div style={{
-            display:"flex", 
-            justifyContent:"center", 
-            marginTop: 24, 
-            fontSize: 24,
-          }}>
-          <b>Block Details</b>
-        </div>
-        <div style={{display:"flex", justifyContent: "center", marginTop: 24}}>
-          <button style={{marginRight: 24}} onClick={() => previousBlock()}>Previous Block</button>
-          <p>{` Block Number: ${blockNumber} `}</p>
-          <button style={{marginLeft: 24}}onClick={() => nextBlock()}>Next Block</button>
-        </div>
+            <nav className="navbar">
+                <div className="">
+                    <h1 href="#">Block Explorer</h1>
+                    <div class="btn-group">
+                        <button type="button" className="btn btn-link">{` Block Number: ${blockNumber} `}</button>
+                        <button type="button" className="btn btn-primary" onClick={() => previousBlock()}>Previous Block</button>
+                        <button type="button" className="btn btn-primary" onClick={() => nextBlock()}>Next Block</button>
+                    </div>
+                </div>
+            </nav>
       </>
     );
   }
@@ -112,26 +109,22 @@ function App() {
   const Transactions = () => {
     return (
       <>
-        <div style={{
-          display:"flex", 
-          justifyContent:"center", 
-          marginTop: 24, 
-          fontSize: 12, 
+        <div className="container" style={{
           overflow: "auto",
           maxHeight: "20rem",
           cursor: "pointer"
         }}>
-          <table>
+          <table className='table table-striped table-condensed'>
             <thead>
               <tr>
                 <th>Transaction Hash</th>
-                <th>Block</th>
+                {/* <th>Block</th> */}
                 <th>From</th>
                 <th>To</th>
-                <th>Confirmations</th>
+                {/* <th>Confirmations</th> */}
                 <th>Value</th>
                 <th>Transaction Fee</th>
-                <th>Data</th>
+                {/* <th>Data</th> */}
               </tr>
             </thead>
             <tbody>
@@ -139,13 +132,13 @@ function App() {
                 return (
                   <tr key={transaction.hash} onClick={() => handleSelectTransaction(transaction.hash)}>
                     <th >{getSubstring(transaction.hash, 15)}</th>
-                    <th>{transaction.blockNumber}</th>
+                    {/* <th>{transaction.blockNumber}</th> */}
                     <th>{getSubstring(transaction.from, 15)}</th>
                     <th>{getSubstring(transaction.to, 15)}</th>
-                    <th>{transaction.confirmations}</th>
+                    {/* <th>{transaction.confirmations}</th> */}
                     <th>{parseFloat(utils.formatEther(transaction.value.toString())).toFixed(12)}</th>
                     <th>{calcFee(transaction, 5)}</th>
-                    <th>{getSubstring(transaction.data,15)}</th>
+                    {/* <th>{getSubstring(transaction.data,15)}</th> */}
                   </tr>
                 )
               })}
@@ -174,32 +167,20 @@ function App() {
   const TransactionDetail = (props) => {
     return (
     <>
-       <div style={{
-        display:"flex", 
-        justifyContent:"center", 
-        marginTop: 24, 
-        fontSize: 24,
-      }}>
-        <b>{"Transaction Hash"}</b>
-      </div>
-
-      <Detail name={"Transaction Hash"} value={props.transaction.hash}/>
-      <Detail name={"Block"} value={props.transaction.blockNumber}/>
-      <Detail name={"From"} value={props.transaction.from}/>
-      <Detail name={"To"} value={props.transaction.to}/>
-      <Detail name={"Confirmations"} value={props.transaction.confirmations}/>
-      {/* <Detail name={"value"} value={props.transaction?.value ? parseFloat(utils.formatEther(props.transaction?.value.toString())) : "0"}/> */}
-      <Detail name={"Transaction Fee"} value={calcFee(props.transaction, 18)}/>
-      <div style={{
-        display:"flex", 
-        flexDirection: "row",
-        justifyContent:"flex-start", 
-        marginLeft: 24, 
-        fontSize: 14,
-      }}>
-        <p style={{marginLeft: 10, marginRight: 10, fontWeight: "bold"}}>Data:</p>
-        <p style={{wordBreak: 'break-all'}}>{props.transaction.data}</p>
-      </div>
+        <div className="container media border p-3">
+            <b>{"Transaction Hash"}</b>
+            <hr></hr>
+        <div className="media-body">
+            <Detail name={"Transaction Hash"} value={props.transaction.hash}/>
+            <Detail name={"Block"} value={props.transaction.blockNumber}/>
+            <Detail name={"From"} value={props.transaction.from}/>
+            <Detail name={"To"} value={props.transaction.to}/>
+            <Detail name={"Confirmations"} value={props.transaction.confirmations}/>
+            {/* <Detail name={"value"} value={props.transaction.value}/> */}
+            <Detail name={"Transaction Fee"} value={calcFee(props.transaction, 18)}/>
+            <Detail name={"Data"} value={props.transaction.data} />
+        </div>
+        </div>
     </>
     )
   }
